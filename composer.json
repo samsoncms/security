@@ -1,0 +1,26 @@
+{
+  "name": "samsoncms/security",
+  "description": "SamsonCMS security application",
+  "author": "Vitaly Iegorov <egorov@samsonos.com>",
+  "require": {
+    "samsoncms/application": "*"
+  },
+  "require-dev": {
+    "behat/behat": "3.*@stable",
+    "behat/mink": "1.6.*@stable",
+    "behat/mink-extension": "@stable",
+    "behat/mink-selenium2-driver": "@stable"
+  },
+  "minimum-stability": "dev",
+  "license": "Open Software License (OSL) v 3.0",
+  "homepage": "http://samsonos.com/",
+  "autoload": {
+    "classmap": ["src/"],
+    "psr-4": {
+      "samsoncms\\app\\security\\": "src/"
+    }
+  },
+  "config":{
+    "github-protocols":["https"]
+  }
+}
