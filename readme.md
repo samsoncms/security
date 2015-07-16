@@ -7,4 +7,4 @@
 [![Total Downloads](https://poser.pugx.org/samsoncms/security/downloads.svg)](https://packagist.org/packages/samsoncms/security)
 [![Stories in Ready](https://badge.waffle.io/samsoncms/security.png?label=ready&title=Ready)](https://waffle.io/samsoncms/security)
 
-[SamsonCMS official web-site](samsoncms.com)
+[SamsonCMS official web-site](http://samsoncms.com)
