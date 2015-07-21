@@ -56,7 +56,7 @@ class Controller extends \samsoncms\Application
 
             // Hide all applications except with access rights
             foreach (self::$loaded as $application) {
-                if (!in_array($application->id, $userRights['application'])) {
+                if (!in_array($application->id, $userRights['application']) && !in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])) {
                     $application->hide = true;
                 }
             }
