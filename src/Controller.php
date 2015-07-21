@@ -51,7 +51,14 @@ class Controller extends \samsoncms\Application
                 $userRights = $this->parseGroupRights($authorizedUser->group_id);
             }
 
-            trace($userRights, true);
+            // If we have full right to access all applications
+            if (in_array('all', $userRights['application'])) {
+                return $securityResult = true;
+            } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
+                return $securityResult = true;
+            } else { // We cannot access this application
+                return $securityResult = false;
+            }
         }
     }
 
@@ -71,11 +78,14 @@ class Controller extends \samsoncms\Application
         if (dbQuery('groupright')->join('right')->cond('GroupID', $groupID)->exec($groupRights)) {
             // Iterate all group rights
             foreach ($groupRights as $groupRight) {
-                foreach ($groupRight->onetomany['_right'] as $userRight) {
-                    // Parse application access rights
-                    $matches = array();
-                    if (preg_match(self::RIGHT_APPLICATION_KEY, $userRight->Name, $matches)) {
-                        $parsedRights['application'][] = $matches['application'];
+                // If we have rights for this group
+                if (isset($groupRight->onetomany['_right'])) {
+                    foreach ($groupRight->onetomany['_right'] as $userRight) {
+                        // Parse application access rights
+                        $matches = array();
+                        if (preg_match(self::RIGHT_APPLICATION_KEY, $userRight->Name, $matches)) {
+                            $parsedRights['application'][] = strtolower($matches['application']);
+                        }
                     }
                 }
             }
