@@ -10,6 +10,12 @@ namespace samsoncms\security;
 /** Security access right */
 class Right extends \samson\activerecord\right
 {
+    /** Application access right name template for generation */
+    const APPLICATION_ACCESS_TEMPLATE = 'APPLICATION_';
+
+    /** Application access right name pattern */
+    const APPLICATION_ACCESS_PATTERN = '/^APPLICATION_(?<application>.*)/ui';
+
     /** All application access right */
-    const APPLICATION_ALL = 'all';
+    const APPLICATION_ACCESS_ALL = 'all';
 }

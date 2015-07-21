@@ -19,6 +19,9 @@ class Controller extends \samsoncms\Application
     /** @var array User group rights cache */
     protected $rightsCache = array();
 
+    /** @var \samsonframework\orm\QueryInterface */
+    protected $db;
+
     /** @var bool Do not show this application in main menu */
     public $hide = true;
 
@@ -52,16 +55,34 @@ class Controller extends \samsoncms\Application
             }
 
             // If we have full right to access all applications
-            if (in_array('all', $userRights['application'])) {
+            if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])) {
                 return $securityResult = true;
             } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
                 return $securityResult = true;
-            } else if ($module == '' && in_array('template', $userRights['application'])) {// Main page
+            } else if ($module == '' && in_array('template', $userRights['application'])) {// Main page(empty url)
                 return $securityResult = true;
             } else { // We cannot access this application
                 return $securityResult = false;
             }
         }
+    }
+
+    /**
+     * Parse application access right
+     * @param string $rightName Right name
+     * @return string Application name
+     */
+    private function matchApplicationAccessRight($rightName, &$applicationName)
+    {
+        // Parse application access rights
+        $matches = array();
+        if (preg_match(Right::APPLICATION_ACCESS_PATTERN, $rightName, $matches)) {
+            // Return application name
+            $applicationName = strtolower($matches['application']);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -72,21 +93,21 @@ class Controller extends \samsoncms\Application
     public function parseGroupRights($groupID)
     {
         /** @var array $parsedRights Parsed rights */
-        $parsedRights = array();
+        $parsedRights = array('application' => array());
 
         /** @var \samsonframework\orm\Record[] $groupRights Collection of user rights */
         $groupRights = array();
         // Retrieve all user group rights
-        if (dbQuery('groupright')->join('right')->cond('GroupID', $groupID)->exec($groupRights)) {
+        if ($this->db->className('groupright')->join('right')->cond('GroupID', $groupID)->exec($groupRights)) {
             // Iterate all group rights
             foreach ($groupRights as $groupRight) {
                 // If we have rights for this group
                 if (isset($groupRight->onetomany['_right'])) {
                     foreach ($groupRight->onetomany['_right'] as $userRight) {
                         // Parse application access rights
-                        $matches = array();
-                        if (preg_match(self::RIGHT_APPLICATION_KEY, $userRight->Name, $matches)) {
-                            $parsedRights['application'][] = strtolower($matches['application']);
+                        $applicationID = '';
+                        if ($this->matchApplicationAccessRight($userRight->Name, $applicationID)) {
+                            $parsedRights['application'][] = $applicationID;
                         }
                     }
                 }
@@ -99,6 +120,47 @@ class Controller extends \samsoncms\Application
     /** Application initialization */
     public function init(array $params = array())
     {
+        // Create database query language
+        $this->db = dbQuery('right');
+
+        // Find all applications that needs access rights to it
+        $accessibleApplications = array(
+            'template' => 'template',   // Main application
+            Right::APPLICATION_ACCESS_ALL => Right::APPLICATION_ACCESS_ALL // All application
+        );
+        
+        // Iterate all loaded applications
+        foreach (self::$loaded as $application) {
+            // Iterate only applications with names
+            if (isset($application->name{0})) {
+                $accessibleApplications[$application->id] = $application->name;
+            }
+        }
+
+        // Go throw all rights and remove unnecessary
+        $rights = array();
+        foreach ($this->db->className('right')->exec() as $right) {
+            // Match application access rights
+            $applicationID = '';
+            if ($this->matchApplicationAccessRight($right->Name, $applicationID)) {
+                // If there is no such application that access right exists
+                if(!isset($accessibleApplications[$applicationID])) {
+                    $right->delete();
+                }
+            }
+        }
+
+        // Iterate all applications that needs access rights
+        foreach ($accessibleApplications as $accessibleApplicationID => $accessibleApplicationName) {
+            // Try to find this right in db
+            if (!$this->db->className('right')->cond('Name', Right::APPLICATION_ACCESS_TEMPLATE.$accessibleApplicationID)->first()) {
+                $right = new Right();
+                $right->Name = Right::APPLICATION_ACCESS_TEMPLATE.strtoupper($accessibleApplicationID);
+                $right->Active = 1;
+                $right->save();
+            }
+        }
+
         // Subscribe to core security event
         \samsonphp\event\Event::subscribe('core.security', array($this, 'handle'));
     }
