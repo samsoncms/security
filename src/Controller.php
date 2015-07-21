@@ -56,6 +56,8 @@ class Controller extends \samsoncms\Application
                 return $securityResult = true;
             } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
                 return $securityResult = true;
+            } else if ($module == '' && in_array('template', $userRights['application'])) {// Main page
+                return $securityResult = true;
             } else { // We cannot access this application
                 return $securityResult = false;
             }
