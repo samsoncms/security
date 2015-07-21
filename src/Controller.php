@@ -13,6 +13,12 @@ namespace samsoncms\security;
  */
 class Controller extends \samsoncms\Application
 {
+    /** Application access right name pattern */
+    const RIGHT_APPLICATION_KEY = '/^APPLICATION_(?<application>.*)/ui';
+
+    /** @var array User group rights cache */
+    protected $rightsCache = array();
+
     /** @var bool Do not show this application in main menu */
     public $hide = true;
 
@@ -35,21 +41,50 @@ class Controller extends \samsoncms\Application
 
         // If we have are authorized
         if (m('social')->authorized()) {
-            // Get authorized user object
+            /**@var \samson\avticerecord\user Get authorized user object */
             $authorizedUser = m('social')->user();
+
+            // Try to load security group rights from cache
+            $userRights = & $this->rightsCache[$authorizedUser->group_id];
+            if (!isset($userRights)) {
+                // Parse security group rights and store it to cache
+                $userRights = $this->parseGroupRights($authorizedUser->group_id);
+            }
+
+            trace($userRights, true);
         }
     }
 
-    public function getUserRights(&$user)
+    /**
+     * Parse database application user group rights
+     * @param integer $groupID Security group identifier
+     * @return array Parsed user group rights
+     */
+    public function parseGroupRights($groupID)
     {
-        /** @var \samsonframework\orm\Record[] $userRights Collection of user rights */
-        $userRights = array();
+        /** @var array $parsedRights Parsed rights */
+        $parsedRights = array();
+
+        /** @var \samsonframework\orm\Record[] $groupRights Collection of user rights */
+        $groupRights = array();
         // Retrieve all user group rights
-        if(dbQuery('groupright')->join('right')->cond('group_id', $user->group_id)->exec($userRights)){
-            
+        if (dbQuery('groupright')->join('right')->cond('GroupID', $groupID)->exec($groupRights)) {
+            // Iterate all group rights
+            foreach ($groupRights as $groupRight) {
+                foreach ($groupRight->onetomany['_right'] as $userRight) {
+                    // Parse application access rights
+                    $matches = array();
+                    if (preg_match(self::RIGHT_APPLICATION_KEY, $userRight->Name, $matches)) {
+                        $parsedRights['application'][] = $matches['application'];
+                    }
+                }
+            }
         }
+
+        return $parsedRights;
     }
 
+    /** Application initialization */
     public function init(array $params = array())
     {
         // Subscribe to core security event
