@@ -128,17 +128,14 @@ class Controller extends \samsoncms\Application
             'template' => 'template',   // Main application
             Right::APPLICATION_ACCESS_ALL => Right::APPLICATION_ACCESS_ALL // All application
         );
-        
+
         // Iterate all loaded applications
         foreach (self::$loaded as $application) {
             // Iterate only applications with names
-            if (isset($application->name{0})) {
-                $accessibleApplications[$application->id] = $application->name;
-            }
+            $accessibleApplications[$application->id] = $application->name;
         }
 
         // Go throw all rights and remove unnecessary
-        $rights = array();
         foreach ($this->db->className('right')->exec() as $right) {
             // Match application access rights
             $applicationID = '';
