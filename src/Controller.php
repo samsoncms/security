@@ -54,6 +54,13 @@ class Controller extends \samsoncms\Application
                 $userRights = $this->parseGroupRights($authorizedUser->group_id);
             }
 
+            // Hide all applications except with access rights
+            foreach (self::$loaded as $application) {
+                if (!in_array($application->id, $userRights['application'])) {
+                    $application->hide = true;
+                }
+            }
+
             // If we have full right to access all applications
             if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])) {
                 return $securityResult = true;
@@ -136,16 +143,16 @@ class Controller extends \samsoncms\Application
         }
 
         // Go throw all rights and remove unnecessary
-        foreach ($this->db->className('right')->exec() as $right) {
-            // Match application access rights
-            $applicationID = '';
-            if ($this->matchApplicationAccessRight($right->Name, $applicationID)) {
-                // If there is no such application that access right exists
-                if(!isset($accessibleApplications[$applicationID])) {
-                    $right->delete();
-                }
-            }
-        }
+//        foreach ($this->db->className('right')->exec() as $right) {
+//            // Match application access rights
+//            $applicationID = '';
+//            if ($this->matchApplicationAccessRight($right->Name, $applicationID)) {
+//                // If there is no such application that access right exists
+//                if(!isset($accessibleApplications[$applicationID])) {
+//                    $right->delete();
+//                }
+//            }
+//        }
 
         // Iterate all applications that needs access rights
         foreach ($accessibleApplications as $accessibleApplicationID => $accessibleApplicationName) {
