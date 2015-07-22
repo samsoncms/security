@@ -22,12 +22,6 @@ class Controller extends \samsoncms\Application
     /** @var array User group rights cache */
     protected $rightsCache = array();
 
-    /** @var \samsonframework\orm\QueryInterface */
-    protected $db;
-
-    /** @var bool Do not show this application in main menu */
-//    public $hide = true;
-
     /** Application name */
     public $name = 'Права';
 
@@ -43,12 +37,14 @@ class Controller extends \samsoncms\Application
     /** @var string Module identifier */
     protected $entity = '\samson\activerecord\group';
 
+    /** @var string SamsonCMS application form class */
     protected $formClassName = '\samsoncms\app\security\form\Form';
 
     /**
      * Core routing(core.routing) event handler
-     * @param \samson\Core $core
-     * @param bollean $securityResult
+     * @param \samson\core\Core $core
+     * @param boolean $securityResult
+     * @return boolean True if security passed
      */
     public function handle(&$core, &$securityResult)
     {
@@ -58,13 +54,13 @@ class Controller extends \samsoncms\Application
         // Get module identifier
         $module = isset($parts[0]) ? $parts[0] : '';
         // Get action identifier
-        $action = isset($parts[1]) ? $parts[1] : '';
+        //$action = isset($parts[1]) ? $parts[1] : '';
         // Get parameter values collection
-        $params = sizeof($parts) > 2 ? array_slice($parts, 2) : array();
+        //$params = sizeof($parts) > 2 ? array_slice($parts, 2) : array();
 
         // If we have are authorized
         if (m('social')->authorized()) {
-            /**@var \samson\avticerecord\user Get authorized user object */
+            /**@var \samson\activerecord\user Get authorized user object */
             $authorizedUser = m('social')->user();
 
             // Try to load security group rights from cache
@@ -110,6 +106,25 @@ class Controller extends \samsoncms\Application
         }
 
         return false;
+    }
+
+    /**
+     * Clear all database security rights records that do not match current application list
+     * @param array $accessibleApplications Collection of loaded applications
+     */
+    private function clearUnmatchedRights(array $accessibleApplications)
+    {
+        // Go throw all rights and remove unnecessary
+        foreach ($this->db->className('right')->exec() as $right) {
+            // Match application access rights
+            $applicationID = '';
+            if ($this->matchApplicationAccessRight($right->Name, $applicationID)) {
+                // If there is no such application that access right exists
+                if(!isset($accessibleApplications[$applicationID])) {
+                    $right->delete();
+                }
+            }
+        }
     }
 
     /**
@@ -175,9 +190,6 @@ class Controller extends \samsoncms\Application
     /** Application initialization */
     public function init(array $params = array())
     {
-        // Create database query language
-        $this->db = dbQuery('right');
-
         // Find all applications that needs access rights to it
         $accessibleApplications = array(
             'template' => 'template',   // Main application
@@ -189,18 +201,6 @@ class Controller extends \samsoncms\Application
             // Iterate only applications with names
             $accessibleApplications[$application->id] = $application->name;
         }
-
-        // Go throw all rights and remove unnecessary
-//        foreach ($this->db->className('right')->exec() as $right) {
-//            // Match application access rights
-//            $applicationID = '';
-//            if ($this->matchApplicationAccessRight($right->Name, $applicationID)) {
-//                // If there is no such application that access right exists
-//                if(!isset($accessibleApplications[$applicationID])) {
-//                    $right->delete();
-//                }
-//            }
-//        }
 
         // Iterate all applications that needs access rights
         foreach ($accessibleApplications as $accessibleApplicationID => $accessibleApplicationName) {
@@ -215,17 +215,5 @@ class Controller extends \samsoncms\Application
 
         // Subscribe to core security event
         \samsonphp\event\Event::subscribe('core.security', array($this, 'handle'));
-    }
-
-    /**
-     * Delete entity
-     * @return array Asynchronous response array
-     */
-    public function __async_remove2($identifier)
-    {
-        if (dbQuery($this->entity)->id($identifier)->first($entity)) {
-            $entity->delete();
-        }
-        return array('status' => 1);
     }
 }

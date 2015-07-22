@@ -1,5 +1,4 @@
 <?php
-
 namespace samsoncms\security;
 
 use samsonframework\core\RenderInterface;
