@@ -7,6 +7,7 @@
  */
 namespace samsoncms\app\security;
 
+use samsoncms\app\security\tab\Main;
 use samsoncms\app\security\tab\Rights;
 use samsonframework\core\RenderInterface;
 use samsonframework\orm\QueryInterface;
@@ -22,6 +23,8 @@ class Form extends \samsoncms\form\Form
     public function __construct(RenderInterface $renderer, QueryInterface $query, Record $entity)
     {
         $this->tabs = array(
+            // Add main tab
+            new Main($renderer, $query, $entity),
             // Add security group rights edition tab
             new Rights($renderer, $query, $entity)
         );
