@@ -7,6 +7,9 @@
  */
 namespace samsoncms\security;
 
+use samson\activerecord\dbQuery;
+use samsonframework\orm\Relation;
+
 /**
  * SamsonCMS security controller
  * @package samsoncms\security
@@ -23,7 +26,24 @@ class Controller extends \samsoncms\Application
     protected $db;
 
     /** @var bool Do not show this application in main menu */
-    public $hide = true;
+//    public $hide = true;
+
+    /** Application name */
+    public $name = 'Права';
+
+    /** Application description */
+    public $description = 'Права доступа';
+
+    /** Application icon*/
+    public $icon = 'unlock';
+
+    /** Identifier */
+    public $id = 'security';
+
+    /** @var string Module identifier */
+    protected $entity = '\samson\activerecord\group';
+
+    protected $formClassName = '\samsoncms\app\security\form\Form';
 
     /**
      * Core routing(core.routing) event handler
@@ -124,6 +144,34 @@ class Controller extends \samsoncms\Application
         return $parsedRights;
     }
 
+
+    public function changeRights($entity)
+    {
+        // right for current entity
+        $entityRightIDs = dbQuery('groupright')->cond('GroupID', $entity->id)->fields('RightID');
+
+        // all rights
+        $right = dbQuery('right')->exec();
+
+        $chbView = '';
+
+        foreach ($right as $item) {
+            if (in_array($item->id, $entityRightIDs)) {
+                $chbView .= "<div class='input-container'>";
+                $chbView .= '<label><input type="checkbox" checked value="1">' . $item->Name . '</label>';
+                $chbView .= "<input type='hidden' name='__action' value='/'>";
+                $chbView .= "</div>";
+            } else {
+                $chbView .= "<div class='input-container'>";
+                $chbView .= '<label><input type="checkbox" value="1">' . $item->Name . '</label>';
+                $chbView .= "<input type='hidden' name='__action' value='".module_url('change_entity_right')."'>";
+                $chbView .= "</div>";
+            }
+        }
+
+        return $this->view('form/tab_item')->chbView($chbView)->output();
+    }
+
     /** Application initialization */
     public function init(array $params = array())
     {
@@ -167,5 +215,17 @@ class Controller extends \samsoncms\Application
 
         // Subscribe to core security event
         \samsonphp\event\Event::subscribe('core.security', array($this, 'handle'));
+    }
+
+    /**
+     * Delete entity
+     * @return array Asynchronous response array
+     */
+    public function __async_remove2($identifier)
+    {
+        if (dbQuery($this->entity)->id($identifier)->first($entity)) {
+            $entity->delete();
+        }
+        return array('status' => 1);
     }
 }
