@@ -112,8 +112,8 @@ class Controller extends \samsoncms\Application
                 }
             }
 
-            // If we have full right to access all applications
-            if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])) {
+            // If we have full right to access all applications or admin
+            if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application']) || $authorizedUser->group_id == 1) {
                 return $securityResult = true;
             } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
                 return $securityResult = true;
