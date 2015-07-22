@@ -47,7 +47,7 @@ class Rights extends Generic
             } else {
                 $chbView .= "<div class='input-container'>";
                 $chbView .= '<label><input type="checkbox" value="1">' . $item->Name . '</label>';
-                $chbView .= "<input type='hidden' name='__action' value='".module_url('change_entity_right')."'>";
+                $chbView .= "<input type='hidden' name='__action' value='".url_build('change_entity_right')."'>";
                 $chbView .= "</div>";
             }
         }
