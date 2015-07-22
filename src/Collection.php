@@ -1,5 +1,5 @@
 <?php
-namespace samsoncms\security;
+namespace samsoncms\app\security;
 
 use samsonframework\core\RenderInterface;
 use samsonframework\orm\QueryInterface;

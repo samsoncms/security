@@ -5,7 +5,7 @@
  * Date: 21.07.2015
  * Time: 12:26
  */
-namespace samsoncms\security;
+namespace samsoncms\app\security;
 
 /** Security access right */
 class Right extends \samson\activerecord\right

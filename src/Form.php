@@ -5,9 +5,7 @@
  * Date: 27.05.2015
  * Time: 13:07
  */
-
-namespace samsoncms\app\security\form;
-
+namespace samsoncms\app\security;
 
 use samsoncms\app\security\tab\EntityRights;
 use samsonframework\core\RenderInterface;

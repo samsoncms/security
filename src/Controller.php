@@ -5,7 +5,7 @@
  * Date: 17.07.2015
  * Time: 9:20
  */
-namespace samsoncms\security;
+namespace samsoncms\app\security;
 
 use samson\activerecord\dbQuery;
 use samsonframework\orm\Relation;
