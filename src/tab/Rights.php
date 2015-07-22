@@ -28,31 +28,45 @@ class Rights extends Generic
     /** @var string Tab identifier */
     protected $id = 'Entity_right_tab';
 
+    /**
+     * Render checkboxes selection list
+     * @param array $availableValues Collection of available entities for selection
+     * @param array $selectedValueIDs Collection of selected entity identifiers
+     * @param string $controller Select/Un-select controller action route
+     * @param string $showField Entity field name for showing
+     * @return string HTML rendered checkboxes list
+     */
+    public function renderList(array $availableValues, array $selectedValueIDs, $controller, $showField = 'Name')
+    {
+        // Iterate all available values
+        $html = '';
+        foreach ($availableValues as $availableValue) {
+            // Define if this value is selected
+            $checked = in_array($availableValue->id, $selectedValueIDs) ? 'checked' : '';
+
+            $html .= '<div class="input-container">';
+            // Render checkbox with label
+            $html .= '<label><input type="checkbox" '.$checked.' value="'.$availableValue->id.'">' . $availableValue->$showField . '</label>';
+            // Render controller action
+            $html .= '<input type="hidden" name="__action" value="'.url_build($controller, 'change', $availableValue->id).'">';
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     /** @inheritdoc */
     public function content()
     {
-        // right for current entity
-        $entityRightIDs = $this->query->className('groupright')->cond('GroupID', $this->entity->id)->fields('RightID');
-
-        // all rights
-        $right = $this->query->className('right')->exec();
-
-        $chbView = '';
-        foreach ($right as $item) {
-            if (in_array($item->id, $entityRightIDs)) {
-                $chbView .= "<div class='input-container'>";
-                $chbView .= '<label><input type="checkbox" checked value="1">' . $item->Name . '</label>';
-                $chbView .= "<input type='hidden' name='__action' value='/'>";
-                $chbView .= "</div>";
-            } else {
-                $chbView .= "<div class='input-container'>";
-                $chbView .= '<label><input type="checkbox" value="1">' . $item->Name . '</label>';
-                $chbView .= "<input type='hidden' name='__action' value='".url_build('change_entity_right')."'>";
-                $chbView .= "</div>";
-            }
-        }
-
-        $content = $this->renderer->view('form/tab_item')->set('chbView', $chbView)->output();
+        // Render tab content
+        $content = $this->renderer
+            ->view('form/tab_item')
+            ->set('chbView', $this->renderList(
+                $this->query->className('right')->exec(),
+                $this->query->className('groupright')->cond('GroupID', $this->entity->id)->fields('RightID'),
+                $this->renderer->id()
+            ))
+            ->output();
 
         return $this->renderer
             ->view($this->contentView)
