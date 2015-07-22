@@ -7,7 +7,7 @@
  */
 namespace samsoncms\app\security;
 
-use samsoncms\app\security\tab\EntityRights;
+use samsoncms\app\security\tab\Rights;
 use samsonframework\core\RenderInterface;
 use samsonframework\orm\QueryInterface;
 use samsonframework\orm\Record;
@@ -18,7 +18,7 @@ class Form extends \samsoncms\form\Form
     public function __construct(RenderInterface $renderer, QueryInterface $query, Record $entity)
     {
         $this->tabs = array(
-            new EntityRights($renderer, $query, $entity)
+            new Rights($renderer, $query, $entity)
         );
 
         parent::__construct($renderer, $query, $entity);

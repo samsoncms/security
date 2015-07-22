@@ -38,7 +38,7 @@ class Controller extends \samsoncms\Application
     protected $entity = '\samson\activerecord\group';
 
     /** @var string SamsonCMS application form class */
-    protected $formClassName = '\samsoncms\app\security\form\Form';
+    protected $formClassName = '\samsoncms\app\security\Form';
 
     /**
      * Core routing(core.routing) event handler
@@ -115,7 +115,7 @@ class Controller extends \samsoncms\Application
     private function clearUnmatchedRights(array $accessibleApplications)
     {
         // Go throw all rights and remove unnecessary
-        foreach ($this->db->className('right')->exec() as $right) {
+        foreach ($this->query->className('right')->exec() as $right) {
             // Match application access rights
             $applicationID = '';
             if ($this->matchApplicationAccessRight($right->Name, $applicationID)) {
@@ -140,7 +140,7 @@ class Controller extends \samsoncms\Application
         /** @var \samsonframework\orm\Record[] $groupRights Collection of user rights */
         $groupRights = array();
         // Retrieve all user group rights
-        if ($this->db->className('groupright')->join('right')->cond('GroupID', $groupID)->exec($groupRights)) {
+        if ($this->query->className('groupright')->join('right')->cond('GroupID', $groupID)->exec($groupRights)) {
             // Iterate all group rights
             foreach ($groupRights as $groupRight) {
                 // If we have rights for this group
@@ -157,34 +157,6 @@ class Controller extends \samsoncms\Application
         }
 
         return $parsedRights;
-    }
-
-
-    public function changeRights($entity)
-    {
-        // right for current entity
-        $entityRightIDs = dbQuery('groupright')->cond('GroupID', $entity->id)->fields('RightID');
-
-        // all rights
-        $right = dbQuery('right')->exec();
-
-        $chbView = '';
-
-        foreach ($right as $item) {
-            if (in_array($item->id, $entityRightIDs)) {
-                $chbView .= "<div class='input-container'>";
-                $chbView .= '<label><input type="checkbox" checked value="1">' . $item->Name . '</label>';
-                $chbView .= "<input type='hidden' name='__action' value='/'>";
-                $chbView .= "</div>";
-            } else {
-                $chbView .= "<div class='input-container'>";
-                $chbView .= '<label><input type="checkbox" value="1">' . $item->Name . '</label>';
-                $chbView .= "<input type='hidden' name='__action' value='".module_url('change_entity_right')."'>";
-                $chbView .= "</div>";
-            }
-        }
-
-        return $this->view('form/tab_item')->chbView($chbView)->output();
     }
 
     /** Application initialization */
@@ -205,7 +177,7 @@ class Controller extends \samsoncms\Application
         // Iterate all applications that needs access rights
         foreach ($accessibleApplications as $accessibleApplicationID => $accessibleApplicationName) {
             // Try to find this right in db
-            if (!$this->db->className('right')->cond('Name', Right::APPLICATION_ACCESS_TEMPLATE.$accessibleApplicationID)->first()) {
+            if (!$this->query->className('right')->cond('Name', Right::APPLICATION_ACCESS_TEMPLATE.$accessibleApplicationID)->first()) {
                 $right = new Right();
                 $right->Name = Right::APPLICATION_ACCESS_TEMPLATE.strtoupper($accessibleApplicationID);
                 $right->Active = 1;
