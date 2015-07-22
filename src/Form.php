@@ -12,12 +12,17 @@ use samsonframework\core\RenderInterface;
 use samsonframework\orm\QueryInterface;
 use samsonframework\orm\Record;
 
+/**
+ * Security group edition form
+ * @package samsoncms\app\security
+ */
 class Form extends \samsoncms\form\Form
 {
     /** @inheritdoc */
     public function __construct(RenderInterface $renderer, QueryInterface $query, Record $entity)
     {
         $this->tabs = array(
+            // Add security group rights edition tab
             new Rights($renderer, $query, $entity)
         );
 
