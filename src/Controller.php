@@ -107,7 +107,10 @@ class Controller extends \samsoncms\Application
 
             // Hide all applications except with access rights
             foreach (self::$loaded as $application) {
-                if (!in_array($application->id, $userRights['application']) && !in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])) {
+                if (!in_array($application->id, $userRights['application'])
+                    && !in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])
+                    && $authorizedUser->group_id != 1
+                ) {
                     $application->hide = true;
                 }
             }
@@ -199,7 +202,7 @@ class Controller extends \samsoncms\Application
     {
         // Find all applications that needs access rights to it
         $accessibleApplications = array(
-            'template' => 'template',   // Main application
+            'template' => 'Главная страница',   // Main application
             Right::APPLICATION_ACCESS_ALL => Right::APPLICATION_ACCESS_ALL // All application
         );
 
@@ -212,9 +215,14 @@ class Controller extends \samsoncms\Application
         // Iterate all applications that needs access rights
         foreach ($accessibleApplications as $accessibleApplicationID => $accessibleApplicationName) {
             // Try to find this right in db
-            if (!$this->query->className('right')->cond('Name', Right::APPLICATION_ACCESS_TEMPLATE.$accessibleApplicationID)->first()) {
+            if (!$this->query->className('right')->cond('Name', Right::APPLICATION_ACCESS_TEMPLATE.$accessibleApplicationID)->first()
+                && isset($accessibleApplicationName{0}) // Name not empty
+            ) {
                 $right = new Right();
                 $right->Name = Right::APPLICATION_ACCESS_TEMPLATE.strtoupper($accessibleApplicationID);
+                $right->Description = $accessibleApplicationID != Right::APPLICATION_ACCESS_ALL
+                    ? t('Доступ к приложению', true).' "'.$accessibleApplicationName.'"'
+                    : t('Полный доступ ко всем приложениям', true);
                 $right->Active = 1;
                 $right->save();
             }

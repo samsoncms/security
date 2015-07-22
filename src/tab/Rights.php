@@ -33,7 +33,7 @@ class Rights extends Generic
      * @param string $showField Entity field name for showing
      * @return string HTML rendered checkboxes list
      */
-    public function renderList(array $availableValues, array $selectedValueIDs, $controller, $showField = 'Name')
+    public function renderList(array $availableValues, array $selectedValueIDs, $controller, $showField = 'Description')
     {
         // Iterate all available values
         $html = '';
