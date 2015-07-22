@@ -25,9 +25,6 @@ class Rights extends Generic
     /** @var \samsoncms\app\security\Controller */
     protected $renderer;
 
-    /** @var string Tab identifier */
-    protected $id = 'Entity_right_tab';
-
     /**
      * Render checkboxes selection list
      * @param array $availableValues Collection of available entities for selection
@@ -44,11 +41,9 @@ class Rights extends Generic
             // Define if this value is selected
             $checked = in_array($availableValue->id, $selectedValueIDs) ? 'checked' : '';
 
-            $html .= '<div class="input-container">';
+            $html .= '<div class="input-container select-checkboxes-list-item">';
             // Render checkbox with label
-            $html .= '<label><input type="checkbox" '.$checked.' value="'.$availableValue->id.'">' . $availableValue->$showField . '</label>';
-            // Render controller action
-            $html .= '<input type="hidden" name="__action" value="'.url_build($controller, 'change', $availableValue->id).'">';
+            $html .= '<label><input type="checkbox" '.$checked.' href="'.url_build($controller, $availableValue->id).'" value="'.$availableValue->id.'">' . $availableValue->$showField . '</label>';
             $html .= '</div>';
         }
 
@@ -64,7 +59,7 @@ class Rights extends Generic
             ->set('chbView', $this->renderList(
                 $this->query->className('right')->exec(),
                 $this->query->className('groupright')->cond('GroupID', $this->entity->id)->fields('RightID'),
-                $this->renderer->id()
+                $this->renderer->id().'/change/'.$this->entity->id
             ))
             ->output();
 

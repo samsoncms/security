@@ -8,6 +8,7 @@
 namespace samsoncms\app\security;
 
 use samson\activerecord\dbQuery;
+use samson\activerecord\groupright;
 use samsonframework\orm\Relation;
 
 /**
@@ -39,6 +40,40 @@ class Controller extends \samsoncms\Application
 
     /** @var string SamsonCMS application form class */
     protected $formClassName = '\samsoncms\app\security\Form';
+
+    /**
+     * Asynchronous change group right controller action
+     * @param string $groupID Group identifier
+     * @param string $rightID Right identifier
+     * @return array Asynchronous response array
+     */
+    public function __async_change($groupID, $rightID)
+    {
+        $group = null;
+        if($this->findEntityByID($groupID, $group)) {
+            $right = null;
+            if($this->findEntityByID($rightID, $right, 'right')) {
+                /** @var \samsonframework\orm\Record  Try to find this right for a specific group */
+                $groupRight = null;
+                if ($this->query->className('groupright')->cond('GroupID', $groupID)->cond('RightID', $rightID)->first($groupRight)) {
+                    // Remove existing
+                    $groupRight->delete();
+                } else { // Create new
+                    $groupRight = new groupright();
+                    $groupRight->Active = 1;
+                    $groupRight->GroupID = $groupID;
+                    $groupRight->RightID = $rightID;
+                    $groupRight->save();
+                }
+
+                return array('status' => '1');
+            }
+
+            return array('status' => '0', 'error' => 'Right #'.$rightID.' was not found');
+        }
+
+        return array('status' => '0', 'error' => 'Group #'.$rightID.' was not found');
+    }
 
     /**
      * Core routing(core.routing) event handler
