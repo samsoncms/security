@@ -202,7 +202,7 @@ class Controller extends \samsoncms\Application
     {
         // Find all applications that needs access rights to it
         $accessibleApplications = array(
-            'template' => 'Главная страница',   // Main application
+            'template' => t('Главная страница', true),   // Main application
             Right::APPLICATION_ACCESS_ALL => Right::APPLICATION_ACCESS_ALL // All application
         );
 
