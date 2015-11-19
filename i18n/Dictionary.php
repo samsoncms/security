@@ -9,8 +9,8 @@ class Dictionary implements IDictionary
     {
         return array(
             "en" => array(
-                "Права" => "Roots",
-                "Права доступа" => "Roots",
+                "Права" => "Rights",
+                "Права доступа" => "Rights",
                 "Группа" => "Group"
             ),
             "ua" => array(
