@@ -9,6 +9,8 @@ namespace samsoncms\app\security;
 
 use samson\activerecord\dbQuery;
 use samson\activerecord\groupright;
+use samsonframework\core\ResourcesInterface;
+use samsonframework\core\SystemInterface;
 use samsonframework\orm\Relation;
 
 /**
@@ -35,11 +37,46 @@ class Controller extends \samsoncms\Application
     /** Identifier */
     public $id = 'security';
 
+    public $dbGroupIdField = 'group_id';
+
     /** @var string Module identifier */
     protected $entity = '\samson\activerecord\group';
 
     /** @var string SamsonCMS application form class */
     protected $formClassName = '\samsoncms\app\security\Form';
+
+    /** @var QueryInterface Database query instance */
+    protected $query;
+
+     //[PHPCOMPRESSOR(remove,start)]
+    public function prepare()
+    {
+        $social = & $this->system->module('social');
+        db()->createField($this, $social->dbTable, 'dbGroupIdField', 'INT(11)');
+
+        // Create default user for first logins
+        $adminUser        = 'admin@admin.com';
+
+           // Try to find generic user
+        $admin = $this->query
+            ->entity($social->dbTable)
+            ->where($social->dbEmailField, $adminUser)
+            ->first();
+
+        // Create user record if missing
+        if (isset($admin)&&($admin[$this->dbGroupIdField] != 1)) {
+            $admin[$this->dbGroupIdField] = 1;
+            $admin->save();
+        }
+        return parent::prepare();
+    }
+    //[PHPCOMPRESSOR(remove,end)]
+
+    public function __construct($path, ResourcesInterface $resources, SystemInterface $system)
+    {
+        $this->query   = new dbQuery();
+        parent::__construct($path, $resources, $system);
+    }
 
     /**
      * Asynchronous change group right controller action
@@ -86,46 +123,55 @@ class Controller extends \samsoncms\Application
         // Remove URL base from current URL, split by '/'
         $parts = explode('/', str_ireplace(__SAMSON_BASE__, '', $_SERVER['REQUEST_URI']));
 
-        // Get module identifier
-        $module = isset($parts[0]) ? $parts[0] : '';
-        // Get action identifier
-        //$action = isset($parts[1]) ? $parts[1] : '';
-        // Get parameter values collection
-        //$params = sizeof($parts) > 2 ? array_slice($parts, 2) : array();
+        $cmsUrl = isset($parts[0]) ? $parts[0] : '';
 
-        // If we have are authorized
-        if (m('social')->authorized()) {
-            /**@var \samson\activerecord\user Get authorized user object */
-            $authorizedUser = m('social')->user();
+        if ($cmsUrl == $core->module('cms')->baseUrl) {
+            // Get module identifier
+            $module = isset($parts[1]) ? $parts[1] : '';
 
-            // Try to load security group rights from cache
-            $userRights = & $this->rightsCache[$authorizedUser->group_id];
-            if (!isset($userRights)) {
-                // Parse security group rights and store it to cache
-                $userRights = $this->parseGroupRights($authorizedUser->group_id);
-            }
+            // Get action identifier
+            //$action = isset($parts[1]) ? $parts[1] : '';
+            // Get parameter values collection
+            //$params = sizeof($parts) > 2 ? array_slice($parts, 2) : array();
+            $social = & $this->system->module('social');
 
-            // Hide all applications except with access rights
-            foreach (self::$loaded as $application) {
-                if (!in_array($application->id, $userRights['application'])
-                    && !in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])
-                    && $authorizedUser->group_id != 1
-                ) {
-                    $application->hide = true;
+            // If we have are authorized
+            if ($social->authorized()) {
+                /**@var \samson\activerecord\user Get authorized user object */
+                $authorizedUser = $social->user();
+
+                // Try to load security group rights from cache
+                $userRights = & $this->rightsCache[$authorizedUser->group_id];
+                if (!isset($userRights)) {
+                    // Parse security group rights and store it to cache
+                    $userRights = $this->parseGroupRights($authorizedUser->group_id);
+                }
+
+                // Hide all applications except with access rights
+                foreach (self::$loaded as $application) {
+                    if (!in_array($application->id, $userRights['application'])
+                        && !in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])
+                        && $authorizedUser->group_id != 1
+                    ) {
+                        $application->hide = true;
+                    }
+                }
+
+                // If we have full right to access all applications or admin
+                if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application']) || $authorizedUser->group_id == 1) {
+                    return $securityResult = true;
+                } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
+                    return $securityResult = true;
+                } else if ($module == '' && in_array('template', $userRights['application'])) {// Main page(empty url)
+                    return $securityResult = true;
+                } else { // We cannot access this application
+                    return $securityResult = false;
                 }
             }
-
-            // If we have full right to access all applications or admin
-            if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application']) || $authorizedUser->group_id == 1) {
-                return $securityResult = true;
-            } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
-                return $securityResult = true;
-            } else if ($module == '' && in_array('template', $userRights['application'])) {// Main page(empty url)
-                return $securityResult = true;
-            } else { // We cannot access this application
-                return $securityResult = false;
-            }
+        } else {
+            return $securityResult = true;
         }
+
     }
 
     /**
