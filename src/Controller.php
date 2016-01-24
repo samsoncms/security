@@ -54,7 +54,6 @@ class Controller extends \samsoncms\Application
         $social = & $this->system->module('social');
         db()->createField($this, $social->dbTable, 'dbGroupIdField', 'INT(11)');
 
-        // Create default user for first logins
         $adminUser        = 'admin@admin.com';
 
            // Try to find generic user
@@ -63,7 +62,7 @@ class Controller extends \samsoncms\Application
             ->where($social->dbEmailField, $adminUser)
             ->first();
 
-        // Create user record if missing
+        // Add admin group id value
         if (isset($admin)&&($admin[$this->dbGroupIdField] != 1)) {
             $admin[$this->dbGroupIdField] = 1;
             $admin->save();
