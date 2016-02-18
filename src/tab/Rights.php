@@ -56,16 +56,16 @@ class Rights extends Generic
         // Render tab content
         $content = $this->renderer
             ->view('form/tab_item')
-            ->set('chbView', $this->renderList(
+            ->set($this->renderList(
                 $this->query->className('right')->exec(),
                 $this->query->className('groupright')->cond('GroupID', $this->entity->id)->fields('RightID'),
                 $this->renderer->id().'/change/'.$this->entity->id
-            ))
+            ),'chbView')
             ->output();
 
         return $this->renderer
             ->view($this->contentView)
-            ->set('content', $content)
+            ->set($content, 'content')
             ->output();
     }
 }
