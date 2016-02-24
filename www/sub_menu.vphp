@@ -1,9 +1,9 @@
 <li class="<?php print(url()->method == '' ? 'active' : '')?>" >
 	<a href="<?php module_url()?>">
-    <?php t('Список')?>
+		<i style="padding-right: 13px;" class="icon2 icon2-list"></i><?php t('Список')?>
 	</a>
 </li><li class=" <?php print(url()->method == 'edit2' ? 'active' : '')?>">
 	<a class="template-list-btn-form" href="<?php module_url('new')?>">
-		<?php t('Новый')?>
+		<i style="padding-right: 13px;" class="icon2 icon2-plus"></i><?php t('Новый')?>
 	</a>
 </li>
