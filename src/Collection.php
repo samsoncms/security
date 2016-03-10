@@ -25,7 +25,7 @@ class Collection extends \samsoncms\Collection
         $this->fields = array(
             new Generic('GroupID', '#', 0, 'id', false),
             new Generic('Name', t('Название группы', true), 0, 'group_name', true),
-            new Generic('Active', t('Активный', true), 11),
+            new Generic('Active', t('Активный', true), 11, 'publish'),
             new Control(),
         );
 
