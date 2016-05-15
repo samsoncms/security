@@ -41,26 +41,65 @@ class Rights extends Generic
             // Define if this value is selected
             $checked = in_array($availableValue->id, $selectedValueIDs) ? 'checked' : '';
 
+            // Translate all fields
+            $finishTranslateParts = $this->translateCustomFields($availableValue->$showField);
+
             $html .= '<div class="input-container select-checkboxes-list-item">';
             // Render checkbox with label
-            $html .= '<label><input type="checkbox" '.$checked.' href="'.url_build($controller, $availableValue->id).'" value="'.$availableValue->id.'">' . $availableValue->$showField . '</label>';
+            $html .= '<label><input type="checkbox" ' . $checked . ' href="' . url_build($controller, $availableValue->id) . '" value="' . $availableValue->id . '">' . $finishTranslateParts . '</label>';
             $html .= '</div>';
         }
 
         return $html;
     }
 
+    /**
+     * Function which translated custom fields for application "Rights"
+     * @param array $inputData
+     * @return string
+     */
+    public function translateCustomFields($inputData)
+    {
+        // Search all part this text block
+        $allTranslateParts = explode("\"", $inputData);
+        // Remove empty elements
+        $allTranslateParts = array_filter($allTranslateParts);
+
+        // First value empty
+        $finishTranslateParts = '';
+        // Counter elements in this array
+        $count = 0;
+        foreach ($allTranslateParts as $oneTranslateParts) {
+            // First part (not have quotes)
+            if ($count == 0) {
+                $finishTranslateParts .= t($oneTranslateParts, true);
+                // Last part with quotes
+            } else {
+                $finishTranslateParts .= ' "' . t($oneTranslateParts, true) . '"';
+            }
+            // Increment count
+            $count++;
+        }
+
+        return $finishTranslateParts;
+    }
+
     /** @inheritdoc */
     public function content()
     {
+        // Translate header
+        $this->name = t($this->name, true);
+
+        // Access to the application
+
         // Render tab content
         $content = $this->renderer
             ->view('form/tab_item')
             ->set($this->renderList(
                 $this->query->className('right')->exec(),
                 $this->query->className('groupright')->cond('GroupID', $this->entity->id)->fields('RightID'),
-                $this->renderer->id().'/change/'.$this->entity->id
-            ),'chbView')
+                $this->renderer->id() . '/change/' . $this->entity->id
+            ), 'chbView')
             ->output();
 
         return $this->renderer
