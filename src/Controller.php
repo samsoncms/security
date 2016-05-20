@@ -120,8 +120,8 @@ class Controller extends \samsoncms\Application
     public function handle(&$core, &$securityResult)
     {
         // Remove URL base from current URL, split by '/'
-        $parts = explode('/', str_ireplace(__SAMSON_BASE__, '', $_SERVER['REQUEST_URI']));
-
+        $parts = explode(__SAMSON_BASE__, $_SERVER['REQUEST_URI']);
+        $parts = array_values(array_filter($parts));
         $cmsUrl = isset($parts[0]) ? $parts[0] : '';
 
         if ($cmsUrl == $core->module('cms')->baseUrl) {
