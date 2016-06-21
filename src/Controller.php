@@ -139,25 +139,28 @@ class Controller extends \samsoncms\Application
                 /**@var \samson\activerecord\user Get authorized user object */
                 $authorizedUser = $social->user();
 
+                $dbTable = $social->dbTable;
+                $groupIdField = $dbTable::$fieldIDs[$this->dbGroupIdField];
+
                 // Try to load security group rights from cache
-                $userRights = & $this->rightsCache[$authorizedUser->group_id];
+                $userRights = & $this->rightsCache[$authorizedUser->$groupIdField];
                 if (!isset($userRights)) {
                     // Parse security group rights and store it to cache
-                    $userRights = $this->parseGroupRights($authorizedUser->group_id);
+                    $userRights = $this->parseGroupRights($authorizedUser->$groupIdField);
                 }
 
                 // Hide all applications except with access rights
                 foreach (self::$loaded as $application) {
                     if (!in_array($application->id, $userRights['application'])
                         && !in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application'])
-                        && $authorizedUser->group_id != 1
+                        && $authorizedUser->$groupIdField != 1
                     ) {
                         $application->hide = true;
                     }
                 }
 
                 // If we have full right to access all applications or admin
-                if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application']) || $authorizedUser->group_id == 1) {
+                if (in_array(Right::APPLICATION_ACCESS_ALL, $userRights['application']) || $authorizedUser->$groupIdField == 1) {
                     return $securityResult = true;
                 } else if (in_array($module, $userRights['application'])) { // Try to find right to access current application
                     return $securityResult = true;
