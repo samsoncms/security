@@ -44,6 +44,24 @@ class Dictionary implements IDictionary
                 "Галлерея" => 'Галерея',
                 "Полный доступ ко всем приложениям" => 'Повний доступ до всіх додатків'
             ),
+            "de" => array(
+                "Права" => "Rechte",
+                "Права доступа" => "Zugangsrechte",
+                "Группа" => "Gruppe",
+                "Название группы" => 'Gruppennamen',
+                "Активный" => 'Aktiv',
+                "Редактировать" => 'Bearbeiten',
+                "Доступные права" => 'Verfügbar Rechte',
+                "Доступ к приложению" => 'Zugriff auf die Anwendungn',
+                "Главная страница" => 'Hauptseite',
+                "Материалы" => 'Material',
+                "Пользователи" => 'Benutzer',
+                "Доп. поля" => 'Extras. Felder',
+                "Структура" => 'Struktur',
+                "Подчиненные материалы" => 'Untergeordnete Materialien',
+                "Галлерея" => 'Galerie',
+                "Полный доступ ко всем приложениям" => 'Voller Zugriff auf alle Anwendungen'
+            ),
         );
     }
 }
