@@ -17,7 +17,7 @@
   "autoload": {
     "psr-4": {
       "samsoncms\\app\\security\\": "src/",
-      "samsoncms\\app\\security\\i18n\\": "src/"
+      "samsoncms\\app\\security\\i18n\\": "i18n/"
     }
   },
   "config":{
