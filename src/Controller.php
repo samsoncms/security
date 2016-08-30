@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Created by PhpStorm.
  * User: egorov
@@ -9,9 +9,12 @@ namespace samsoncms\app\security;
 
 use samson\activerecord\dbQuery;
 use samson\activerecord\groupright;
+use samsonframework\containerannotation\Inject;
+use samsonframework\containerannotation\Injectable;
+use samsonframework\containerannotation\InjectArgument;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
-use samsonframework\orm\Relation;
+use samsonframework\i18n\i18nInterface;
 
 /**
  * SamsonCMS security controller
@@ -48,6 +51,12 @@ class Controller extends \samsoncms\Application
     /** @var QueryInterface Database query instance */
     protected $query;
 
+    /**
+     * @var \samsonframework\i18n\I18nInterface
+     * @Injectable
+     */
+    protected $i18n;
+
      //[PHPCOMPRESSOR(remove,start)]
     public function prepare()
     {
@@ -71,9 +80,20 @@ class Controller extends \samsoncms\Application
     }
     //[PHPCOMPRESSOR(remove,end)]
 
+    /**
+     * Controller constructor.
+     *
+     * @param string             $path
+     * @param ResourcesInterface $resources
+     * @param SystemInterface    $system
+     *
+     * @InjectArgument(resources="\samsonframework\core\ResourcesInterface")
+     * @InjectArgument(system="\samsonframework\core\SystemInterface")
+     */
     public function __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {
-        $this->query   = new dbQuery();
+        $this->query = new dbQuery();
+
         parent::__construct($path, $resources, $system);
     }
 
@@ -250,7 +270,7 @@ class Controller extends \samsoncms\Application
     {
         // Find all applications that needs access rights to it
         $accessibleApplications = array(
-            'template' => t('Главная страница', true),   // Main application
+            'template' => $this->i18n->translate('Главная страница'),   // Main application
             Right::APPLICATION_ACCESS_ALL => Right::APPLICATION_ACCESS_ALL // All application
         );
 
@@ -269,8 +289,8 @@ class Controller extends \samsoncms\Application
                 $right = new Right();
                 $right->Name = Right::APPLICATION_ACCESS_TEMPLATE.strtoupper($accessibleApplicationID);
                 $right->Description = $accessibleApplicationID != Right::APPLICATION_ACCESS_ALL
-                    ? t('Доступ к приложению', true).' "'.$accessibleApplicationName.'"'
-                    : t('Полный доступ ко всем приложениям', true);
+                    ? $this->i18n->translate('Доступ к приложению').' "'.$accessibleApplicationName.'"'
+                    : $this->i18n->translate('Полный доступ ко всем приложениям');
                 $right->Active = 1;
                 $right->save();
             }

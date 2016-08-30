@@ -1,5 +1,5 @@
 <?php
-namespace samsoncms\security;
+namespace samsoncms\security\i18n;
 
 use samsonphp\i18n\IDictionary;
 
