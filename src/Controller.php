@@ -62,7 +62,7 @@ class Controller extends \samsoncms\Application
     public function prepare()
     {
         $social = & $this->system->module('social');
-        db()->createField($this, $social->dbTable, 'dbGroupIdField', 'INT(11)');
+        //db()->createField($this, $social->dbTable, 'dbGroupIdField', 'INT(11)');
 
         $adminUser        = 'admin@admin.com';
 
@@ -80,24 +80,6 @@ class Controller extends \samsoncms\Application
         return parent::prepare();
     }
     //[PHPCOMPRESSOR(remove,end)]
-
-    /**
-     * Controller constructor.
-     *
-     * @param string             $path
-     * @param ResourcesInterface $resources
-     * @param SystemInterface    $system
-     *
-     * @InjectArgument(query="\samsonframework\orm\QueryInterface")
-     * @InjectArgument(resources="\samsonframework\core\ResourcesInterface")
-     * @InjectArgument(system="\samsonframework\core\SystemInterface")
-     */
-    public function __construct(QueryInterface $query, $path, ResourcesInterface $resources, SystemInterface $system)
-    {
-        $this->query = $query;
-
-        parent::__construct($path, $resources, $system);
-    }
 
     /**
      * Asynchronous change group right controller action
