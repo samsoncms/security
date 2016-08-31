@@ -15,6 +15,7 @@ use samsonframework\containerannotation\InjectArgument;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\i18n\i18nInterface;
+use samsonframework\orm\QueryInterface;
 
 /**
  * SamsonCMS security controller
@@ -52,7 +53,7 @@ class Controller extends \samsoncms\Application
     protected $query;
 
     /**
-     * @var \samsonframework\i18n\I18nInterface
+     * @var \samsonframework\i18n\i18nInterface
      * @Injectable
      */
     protected $i18n;
@@ -87,12 +88,13 @@ class Controller extends \samsoncms\Application
      * @param ResourcesInterface $resources
      * @param SystemInterface    $system
      *
+     * @InjectArgument(query="\samsonframework\orm\QueryInterface")
      * @InjectArgument(resources="\samsonframework\core\ResourcesInterface")
      * @InjectArgument(system="\samsonframework\core\SystemInterface")
      */
-    public function __construct($path, ResourcesInterface $resources, SystemInterface $system)
+    public function __construct(QueryInterface $query, $path, ResourcesInterface $resources, SystemInterface $system)
     {
-        $this->query = new dbQuery();
+        $this->query = $query;
 
         parent::__construct($path, $resources, $system);
     }
