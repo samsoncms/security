@@ -8,7 +8,7 @@
 namespace samsoncms\app\security;
 
 /** Security access right */
-class Right extends \samson\activerecord\right
+class Right extends \samson\activerecord\Right
 {
     /** Application access right name template for generation */
     const APPLICATION_ACCESS_TEMPLATE = 'APPLICATION_';

@@ -143,7 +143,7 @@ class Controller extends \samsoncms\Application
                 /**@var \samson\activerecord\user Get authorized user object */
                 $authorizedUser = $social->user();
 
-                $dbTable = $social->dbTable;
+                $dbTable = $social->dbTable.'Query';
                 $groupIdField = $dbTable::$fieldIDs[$this->dbGroupIdField];
 
                 // Try to load security group rights from cache
