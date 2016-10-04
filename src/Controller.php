@@ -9,6 +9,7 @@ namespace samsoncms\app\security;
 
 use samson\activerecord\dbQuery;
 use samson\activerecord\groupright;
+use samsonframework\container\definition\analyzer\annotation\annotation\InjectClass;
 use samsonframework\containerannotation\Inject;
 use samsonframework\containerannotation\Injectable;
 use samsonframework\containerannotation\InjectArgument;
@@ -54,14 +55,14 @@ class Controller extends \samsoncms\Application
 
     /**
      * @var \samsonframework\i18n\i18nInterface
-     * @Injectable
+     * @InjectClass("samsonframework\i18n\I18nInterface")
      */
     protected $i18n;
 
      //[PHPCOMPRESSOR(remove,start)]
     public function prepare()
     {
-        $social = & $this->system->module('social');
+        $social = $this->system->module('social');
         //db()->createField($this, $social->dbTable, 'dbGroupIdField', 'INT(11)');
 
         $adminUser        = 'admin@admin.com';
