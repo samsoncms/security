@@ -122,7 +122,7 @@ class Controller extends \samsoncms\Application
      * @param boolean $securityResult
      * @return boolean True if security passed
      */
-    public function handle($core, &$securityResult)
+    public function handle(&$core, &$securityResult)
     {
         // Remove URL base from current URL, split by '/'
         $parts = explode(__SAMSON_BASE__, $_SERVER['REQUEST_URI']);
@@ -253,6 +253,8 @@ class Controller extends \samsoncms\Application
     /** Application initialization */
     public function init(array $params = array())
     {
+        $this->i18n = $this->i18n ?? $this->system->module('i18n');
+        
         // Find all applications that needs access rights to it
         $accessibleApplications = array(
             'template' => $this->i18n->translate('Главная страница'),   // Main application
