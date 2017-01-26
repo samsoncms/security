@@ -122,7 +122,7 @@ class Controller extends \samsoncms\Application
      * @param boolean $securityResult
      * @return boolean True if security passed
      */
-    public function handle(&$core, &$securityResult)
+    public function handle($core, &$securityResult)
     {
         // Remove URL base from current URL, split by '/'
         $parts = explode(__SAMSON_BASE__, $_SERVER['REQUEST_URI']);
